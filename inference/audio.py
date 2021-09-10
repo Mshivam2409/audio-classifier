@@ -43,15 +43,19 @@ class AudioClassifierCNN:
         waveform = self.get_waveform(file)
         return self.get_spectrogram(waveform)
 
-    def predict(self, file, top):
+    def predict(self, file, answer):
         spectrogram = self.preprocess(file)
         predictions = self.model(tf.expand_dims(spectrogram, 0))
         prediction = tf.nn.softmax(predictions[0]).numpy()
-        top_predictions = prediction.argsort()[::-1][:top]
-        return [
-            {"label": self.labels[i], "match": prediction[i].item()}
-            for i in top_predictions
-        ]
+        top_predictions = prediction.argsort()[::-1][:5]
+        if self.labels[top_predictions[0]] == answer:
+            return True
+        else:
+            return False
+        # return [
+        #     {"label": self.labels[i], "match": prediction[i].item(), "is_matched": True}
+        #     for i in top_predictions
+        # ]
 
 
 AudioClassifier = AudioClassifierCNN("./models/classifier250")
